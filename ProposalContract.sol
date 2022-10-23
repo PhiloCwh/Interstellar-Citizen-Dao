@@ -17,13 +17,13 @@ contract ProposalContract {
         uint timeLimited;
         uint numConfirmations;
     }
-    Proposal[] public proposalList;
+    //Proposal[] public proposalList;
     // mapping from proposal index => owner => bool
     //成员是否确认投票
     mapping(uint => mapping(address => bool)) public isConfirmed;
     mapping (uint => Proposal) public indexForProposal;
 
-    uint proposalCounter;
+    uint public proposalCounter;
 
     constructor(address _NemberData, address _ERC20) {
         NemberData = INemberData(_NemberData);
@@ -92,4 +92,46 @@ contract ProposalContract {
 
         //emit Confirmproposal(msg.sender, _proposalIndex);
     }
+    //取消确认
+    function revokeConfirmation(uint _proposalIndex)
+        public
+        onlyNember
+        proposalExists(_proposalIndex)
+        notExecuted(_proposalIndex)
+        timeLimited(_proposalIndex)
+    {
+        Proposal storage proposal = indexForProposal[_proposalIndex];
+
+        require(isConfirmed[_proposalIndex][msg.sender], "proposal not confirmed");
+
+        proposal.numConfirmations -= 1;
+        isConfirmed[_proposalIndex][msg.sender] = false;
+
+        //emit RevokeConfirmation(msg.sender, _txIndex);
+    }
+
+    function executeProposal(uint _proposalIndex)
+        public
+        onlyNember
+        proposalExists(_proposalIndex)
+        notExecuted(_proposalIndex)
+    {
+        Proposal storage proposal = indexForProposal[_proposalIndex];
+
+        require(1>0
+            //执行条件待补充
+            //proposal.numConfirmations >= numConfirmationsRequired,
+            ,"cannot execute proposal"
+        );
+
+        proposal.executed = true;
+
+        //执行逻辑
+        
+        require(1>0/*执行成功条件*/ ,"tx failed");
+
+        //emit ExecuteTransaction(msg.sender, _txIndex);
+    }
+
+
 }
